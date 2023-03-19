@@ -10,7 +10,7 @@
 
 import re
 
-BASIC_RULES = {'á':'A', 'y':'i', 'í':'I', 'é':'E','ó':'O','ů':'ú', 'ú':'U', 'š':'S', 'ř':'R',
+BASIC_RULES = {'á':'A', 'y':'i', 'í':'I','ý':'I', 'é':'E','ó':'O','ů':'ú', 'ú':'U', 'š':'S', 'ř':'R',
 'ť':'T', 'ď':'D', 'ň':'J', 'č':'C', 'ž':'Z', 'ou':'y', 'au':'Y', 'eu':'F'}
 
 VOCALS = ['a', 'e', 'i', 'o', 'u', 'á', 'é', 'í', 'ó', 'ů', 'ú']
@@ -33,7 +33,12 @@ VOICE_CONSTANTxx = {'pp':'p', 'tt':'t', 'ťť':'ť', 'kk' :'k', 'ff':'f', 'ss':'
 
 VOICLESS_CONSTANT = {v: k for k, v in VOICE_CONSTANT.items()} # swap keys and vals in VOICE_CONSTANT
 
+V_EXCEPTIONS = ['tv', 't|v', 'kv', 'k|v', 'sv', 's|v', 'šv', 'š|v', 'cv', 'c|v', 'čv']
+
 UNIQUE_CONSTANT = ['m', 'n', 'ň', 'l', 'r', 'j']
+
+
+EXCEPTIONS = {'nashleda':'nasxleda', 'shora':'zhora', 'shůr':'zhůr', 'shluk':'zhluk', 'shod':'sxod'}
 
 
 def preproces(text):
@@ -44,12 +49,16 @@ def preproces(text):
     splited = splited + '$|'
     splited = splited.replace('\n', '')
     splited = splited.replace('ch', 'x')
+    for key in EXCEPTIONS.keys():
+        splited = splited.replace(key, EXCEPTIONS[key])
+
     return splited
 
 
 def basic_tran(text):
     for key in BASIC_RULES:
         text = text.replace(key, BASIC_RULES[key])
+
     return text
 
 def vocal_tran(text):
@@ -71,7 +80,6 @@ def constant_tran(text):
             text = text.replace(DTNM[i] + 'ě', DTNM[i] + 'ňe')
         else:
             text = text.replace(DTNM[i] + 'ě', DTN_tran[i] + 'e')
-    
 
     return text
 
@@ -92,16 +100,18 @@ def voice_asimilation(text):
             text = text.replace(z + 'ř', z + 'Q')
         text = text.replace(i + '|#|', VOICE_CONSTANTx[i]+'|#|')
 
-    # (rovnice 2.26)
+    # (rovnice 2.26 + rovnice 2.28)
     for i in VOICLESS_CONSTANT.keys():
         for j in VOICE_CONSTANTx.keys():
-            text = text.replace(i + j, VOICLESS_CONSTANT[i]+j)
-            text = text.replace(i + '|' + j, VOICLESS_CONSTANT[i] + '|' + j)
+            if i + j in V_EXCEPTIONS:
+                continue
+            else:
+                text = text.replace(i + j, VOICLESS_CONSTANT[i]+j)
+                text = text.replace(i + '|' + j, VOICLESS_CONSTANT[i] + '|' + j)
 
     # vifikundace, aby se mi to nepřepisovalo
     for key in VOICE_CONSTANTxx.keys():
         text = text.replace(key, VOICE_CONSTANTxx[key])
-
 
     return text
 
