@@ -28,8 +28,8 @@ SPLIT_ON = ['.', '?', '!', '-', '_']
 
 VOICE_CONSTANT = {'b':'p', 'd':'t', 'ď':'ť', 'g' :'k', 'v':'f', 'z':'s', 'ž':'š', 'ř':'Q', 'dz':'c', 'dž':'č'}
 
-VOICE_CONSTANTx = {'b':'pp', 'd':'tt', 'ď':'ťť', 'g' :'kk', 'v':'ff', 'z':'ss', 'ž':'šš', 'ř':'QQ', 'dz':'cc', 'dž':'čč'}
-VOICE_CONSTANTxx = {'pp':'p', 'tt':'t', 'ťť':'ť', 'kk' :'k', 'ff':'f', 'ss':'s', 'šš':'š', 'xx':'x', 'QQ':'Q', 'cc':'c', 'čč':'č'}
+VOICE_CONSTANTx = {'b':'p*', 'd':'t*', 'ď':'ť*', 'g' :'k*', 'v':'f*', 'z':'s*', 'ž':'š*', 'ř':'Q*', 'dz':'c*', 'dž':'č*'}
+VOICE_CONSTANTxx = {'p*':'p', 't*':'t', 'ť*':'ť', 'k*' :'k', 'f*':'f', 's*':'s', 'š*':'š', 'x*':'x', 'Q*':'Q', 'c*':'c', 'č*':'č'}
 
 VOICLESS_CONSTANT = {v: k for k, v in VOICE_CONSTANT.items()} # swap keys and vals in VOICE_CONSTANT
 
@@ -84,6 +84,9 @@ def constant_tran(text):
     return text
 
 def voice_asimilation(text):
+
+    for i in VOICE_CONSTANTx.keys():
+        text = text.replace(i + '|v', VOICE_CONSTANTx[i]+'|v')
     # tady řeším ty základní srandy (rovnice 2.26)
     for i in VOICE_CONSTANTx.keys():
         for j in VOICLESS_CONSTANT.keys():
@@ -102,7 +105,7 @@ def voice_asimilation(text):
 
     # (rovnice 2.26 + rovnice 2.28)
     for i in VOICLESS_CONSTANT.keys():
-        for j in VOICE_CONSTANTx.keys():
+        for j in VOICE_CONSTANT.keys():
             if i + j in V_EXCEPTIONS:
                 continue
             else:
